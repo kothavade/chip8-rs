@@ -11,29 +11,34 @@
       };
     };
   };
-  outputs = { self, nixpkgs, flake-utils, rust-overlay }:
+  outputs = {
+    self,
+    nixpkgs,
+    flake-utils,
+    rust-overlay,
+  }:
     flake-utils.lib.eachDefaultSystem
-      (system:
-        let
-          overlays = [ (import rust-overlay) ];
-          pkgs = import nixpkgs {
-            inherit system overlays;
+    (
+      system: let
+        overlays = [(import rust-overlay)];
+        pkgs = import nixpkgs {
+          inherit system overlays;
+        };
+        rust-bin =
+          pkgs.rust-bin.stable.latest.default.override
+          {
+            # For rust-analyzer
+            extensions = ["rust-src"];
           };
-          rust-bin = pkgs.rust-bin.stable.latest.default.override
-            {
-              # For rust-analyzer
-              extensions = [ "rust-src" ];
-            };
-          nativeBuildInputs = [ rust-bin ];
-          buildInputs = with pkgs; [ SDL2 ];
-        in
-        with pkgs;
-        {
+        nativeBuildInputs = [rust-bin];
+        buildInputs = with pkgs; [SDL2];
+      in
+        with pkgs; {
           devShells.default =
             mkShell
-              {
-                inherit buildInputs nativeBuildInputs;
-              };
+            {
+              inherit buildInputs nativeBuildInputs;
+            };
         }
-      );
+    );
 }
