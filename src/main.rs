@@ -4,6 +4,7 @@ use cpu::Cpu;
 
 fn main() {
     let rom = std::fs::read("roms/invaders.ch8").expect("Unable to read rom");
+    // let rom = std::fs::read(std::env::args().nth(1).unwrap()).expect("Unable to read rom");
 
     let chip8 = Cpu::new();
 
