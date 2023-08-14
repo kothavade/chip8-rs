@@ -24,14 +24,9 @@
         pkgs = import nixpkgs {
           inherit system overlays;
         };
-        rust-bin =
-          pkgs.rust-bin.stable.latest.default.override
-          {
-            # For rust-analyzer
-            extensions = ["rust-src"];
-          };
-        nativeBuildInputs = [rust-bin];
-        buildInputs = with pkgs; [SDL2];
+        rust-stable = pkgs.rust-bin.stable.latest.default;
+        nativeBuildInputs = [(rust-stable.override {extensions = ["rust-src" "rust-analyzer"];})];
+        buildInputs = with pkgs; [SDL2 sccache];
       in
         with pkgs; {
           devShells.default =
