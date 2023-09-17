@@ -1,3 +1,13 @@
 {
-    "nixEnvSelector.nixFile": "${workspaceRoot}/flake.nix"
+  "nixEnvSelector.nixFile": "${workspaceRoot}/flake.nix",
+  "rust-analyzer.linkedProjects": ["./Cargo.toml"],
+  "cSpell.words": [
+    "annn",
+    "bnnn",
+    "COLEMAK",
+    "cxkk",
+    "dxyn",
+    "KEYMAP",
+    "opengl"
+  ]
 }

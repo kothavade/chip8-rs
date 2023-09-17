@@ -1,31 +1,50 @@
-mod cpu;
-mod display;
-mod input;
-mod mem;
+mod chip8;
 
-use cpu::Cpu;
-use display::Display;
-use input::Input;
-use mem::Memory;
-use sdl2::{event::Event, pixels::Color};
+use chip8::Chip8;
+use sdl2::{
+    audio::{AudioCallback, AudioSpecDesired},
+    event::Event,
+    keyboard::Keycode,
+    pixels::Color,
+    rect::Rect,
+    render::Canvas,
+    video::Window,
+};
 use std::time::Duration;
 
+const CYCLES_PER_FRAME: u32 = 10;
+const FPS: u32 = 60;
+const KEYMAP: &[Keycode; 16] = COLEMAK_DH;
+
 fn main() {
-    let cpu = Cpu::default();
-    let mut mem = Memory::default();
-    let mut display = Display::default();
-    let mut input = Input::default();
+    let mut emu = Chip8::new();
 
-    let rom = std::fs::read("roms/invaders.ch8").expect("Unable to read rom");
-    // let rom = std::fs::read(std::env::args().nth(1).unwrap()).expect("Unable to read rom");
+    let rom = std::fs::read(std::env::args().nth(1).unwrap()).expect("Unable to read rom");
 
-    mem.load_rom(&rom);
+    emu.load_rom(&rom);
 
     let sdl_context = sdl2::init().unwrap();
+
+    let audio_subsystem = sdl_context.audio().unwrap();
+    let spec = AudioSpecDesired {
+        freq: Some(3000),
+        channels: Some(1),
+        samples: None,
+    };
+
+    let device = audio_subsystem
+        .open_playback(None, &spec, |spec| SquareWave {
+            phase_inc: 440.0 / spec.freq as f32,
+            phase: 0.0,
+            volume: 0.25,
+        })
+        .unwrap();
+
     let video_subsystem = sdl_context.video().unwrap();
     let window = video_subsystem
         .window("Chip8 Emulator", 640, 320)
         .position_centered()
+        .opengl()
         .build()
         .unwrap();
 
@@ -36,7 +55,6 @@ fn main() {
     canvas.present();
 
     let mut event_pump = sdl_context.event_pump().unwrap();
-    let mut first = true;
 
     'running: loop {
         canvas.set_draw_color(Color::RGB(0, 0, 0));
@@ -49,33 +67,119 @@ fn main() {
                     keycode: Some(keycode),
                     ..
                 } => {
-                    println!("Key pressed: {:?}", keycode);
-                    input.handle_key(keycode, true);
+                    if let Some(key) = key_to_input(keycode) {
+                        emu.keypress(key, true);
+                    }
                 }
                 Event::KeyUp {
                     keycode: Some(keycode),
                     ..
                 } => {
-                    println!("Key let go: {:?}", keycode);
-                    input.handle_key(keycode, false);
+                    if let Some(key) = key_to_input(keycode) {
+                        emu.keypress(key, false);
+                    }
                 }
                 _ => {}
             }
         }
-        if first {
-            display.draw_sprite(
-                0,
-                0,
-                &[0b11111111, 0b10000001, 0b10000001, 0b10000001, 0b11111111],
-            );
 
-            display.draw_sprite(
-                10,
-                10,
-                &[
-            first = false;
+        for _ in 0..CYCLES_PER_FRAME {
+            emu.cycle();
         }
-        display.draw_to_canvas(&mut canvas);
-        std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 30));
+        emu.cycle_timer();
+        draw(&mut canvas, &emu.get_display());
+        play(&device, emu.get_sound());
+
+        print!("\x1B[2J\x1B[1;1H");
+        println!("{}", emu);
+
+        canvas.present();
+        std::thread::sleep(Duration::new(0, 1_000_000_000u32 / FPS));
     }
 }
+
+struct SquareWave {
+    phase_inc: f32,
+    phase: f32,
+    volume: f32,
+}
+
+impl AudioCallback for SquareWave {
+    type Channel = f32;
+
+    fn callback(&mut self, out: &mut [f32]) {
+        for x in out.iter_mut() {
+            *x = if self.phase < 0.5 {
+                self.volume
+            } else {
+                -self.volume
+            };
+            self.phase = (self.phase + self.phase_inc) % 1.0;
+        }
+    }
+}
+
+fn play(device: &sdl2::audio::AudioDevice<SquareWave>, play: bool) {
+    if play {
+        device.resume();
+    } else {
+        device.pause();
+    }
+}
+
+fn draw(canvas: &mut Canvas<Window>, display: &[bool; 64 * 32]) {
+    canvas.set_draw_color(Color::RGB(0, 0, 0));
+    canvas.clear();
+    canvas.set_draw_color(Color::RGB(255, 255, 255));
+    for (i, pixel) in display.iter().enumerate() {
+        let x = (i % 64) as i32 * 10;
+        let y = (i / 64) as i32 * 10;
+        if *pixel {
+            canvas
+                .fill_rect(Rect::new(x, y, 10, 10))
+                .expect("Failed to draw rect");
+        }
+    }
+}
+
+fn key_to_input(keycode: Keycode) -> Option<u8> {
+    KEYMAP.iter().position(|&k| k == keycode).map(|i| i as u8)
+}
+
+const COLEMAK_DH: &[Keycode; 16] = &[
+    Keycode::Num1,
+    Keycode::Num2,
+    Keycode::Num3,
+    Keycode::Num4,
+    Keycode::Q,
+    Keycode::W,
+    Keycode::F,
+    Keycode::P,
+    Keycode::A,
+    Keycode::R,
+    Keycode::S,
+    Keycode::T,
+    Keycode::X,
+    Keycode::C,
+    Keycode::D,
+    Keycode::V,
+];
+
+const QWERTY: &[Keycode; 16] = &[
+    Keycode::Num1,
+    Keycode::Num2,
+    Keycode::Num3,
+    Keycode::Num4,
+    Keycode::Q,
+    Keycode::W,
+    Keycode::E,
+    Keycode::R,
+    Keycode::A,
+    Keycode::S,
+    Keycode::D,
+    Keycode::F,
+    Keycode::Z,
+    Keycode::X,
+    Keycode::C,
+    Keycode::V,
+];
