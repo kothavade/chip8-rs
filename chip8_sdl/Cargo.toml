@@ -1,0 +1,9 @@
+[package]
+name = "chip8_sdl"
+version = "0.1.0"
+edition = "2021"
+
+
+[dependencies]
+chip8_backend = { path = "../chip8_backend" }
+sdl2 = "0.35.2"

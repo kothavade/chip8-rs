@@ -4,3 +4,4 @@
 # Nix
 /result
 /.direnv
+index.js

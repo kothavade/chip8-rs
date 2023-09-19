@@ -6,7 +6,9 @@ An emulator for the Chip-8, written in Rust.
 
 ```sh
 nix develop # or direnv allow
-cargo run --release roms/games/Space\ Invaders\ \[David\ Winter\].ch8
+# run desktop build with sdl
+cd chip8-sdl
+cargo run ../roms/games/Space\ Invaders\ \[David\ Winter\].ch8
 ```
 
 ## Tech

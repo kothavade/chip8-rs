@@ -1,0 +1,37 @@
+[package]
+name = "chip8_wasm"
+version = "0.1.0"
+authors = ["Ved Kothavade <ved@kothavade.com>"]
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib"]
+
+[features]
+default = ["console_error_panic_hook"]
+
+[dependencies]
+chip8_backend = { path = "../chip8_backend", features = ["wasm"] }
+js-sys = "0.3.64"
+wasm-bindgen = "0.2.84"
+console_error_panic_hook = { version = "0.1.7", optional = true }
+
+[dependencies.web-sys]
+version = "0.3.64"
+features = [
+    "KeyboardEvent",
+    "CanvasRenderingContext2d",
+    "Document",
+    "Element",
+    "HtmlCanvasElement",
+    "ImageData",
+    "KeyboardEvent",
+    "Window",
+]
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.34"
+
+[profile.release]
+# Tell `rustc` to optimize for small code size.
+opt-level = "s"

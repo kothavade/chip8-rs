@@ -1,12 +1,18 @@
 {
   "nixEnvSelector.nixFile": "${workspaceRoot}/flake.nix",
-  "rust-analyzer.linkedProjects": ["./Cargo.toml"],
+  "rust-analyzer.linkedProjects": [
+    "./chip8_sdl/Cargo.toml",
+    "./chip8_backend/Cargo.toml",
+    "./chip8_wasm/Cargo.toml"
+  ],
   "cSpell.words": [
     "annn",
+    "bindgen",
     "bnnn",
     "COLEMAK",
     "cxkk",
     "dxyn",
+    "fileinput",
     "KEYMAP",
     "opengl"
   ]

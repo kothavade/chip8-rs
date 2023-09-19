@@ -25,8 +25,20 @@
           inherit system overlays;
         };
         rust-stable = pkgs.rust-bin.stable.latest.default;
-        nativeBuildInputs = [(rust-stable.override {extensions = ["rust-src" "rust-analyzer"];})];
-        buildInputs = with pkgs; [SDL2 sccache];
+        nativeBuildInputs = [
+          (rust-stable.override {
+            extensions = ["rust-src" "rust-analyzer"];
+            targets = ["wasm32-unknown-unknown"];
+          })
+        ];
+        buildInputs = with pkgs; [
+          SDL2
+          sccache
+          wasm-pack
+          cargo-generate
+          curl
+          bun
+        ];
       in
         with pkgs; {
           devShells.default =
