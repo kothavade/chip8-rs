@@ -4,6 +4,8 @@ An emulator for the Chip-8, written in Rust.
 
 ## Demo
 
+Unfortunately audio was not captured, so you'll have to trust that the beeps work :)
+
 https://github.com/kothavade/chip8-rs/assets/60118973/82bdbd61-c501-43e1-958c-42e510c820cb
 
 ## Run
