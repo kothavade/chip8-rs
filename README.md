@@ -1,6 +1,10 @@
-# Chip8-rs
+<h1 align="center">
+  👾 chip8-rs 👾
+</h1>
 
 An emulator for the Chip-8, written in Rust.
+
+The desktop build can be found in the `chip8_sdl` crate, the work in progress WASM build can be found in the `chip8_wasm` crate, and the core emulator logic is in the `chip8_core` crate.
 
 ## Demo
 
