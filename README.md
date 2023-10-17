@@ -2,6 +2,10 @@
 
 An emulator for the Chip-8, written in Rust.
 
+## Demo
+
+https://github.com/kothavade/chip8-rs/assets/60118973/82bdbd61-c501-43e1-958c-42e510c820cb
+
 ## Run
 
 ```sh
