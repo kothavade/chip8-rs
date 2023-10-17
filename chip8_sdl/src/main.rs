@@ -17,8 +17,8 @@ const KEYMAP: &[Keycode; 16] = COLEMAK_DH;
 fn main() {
     let mut emu = Chip8::new();
 
-    let rom = std::fs::read(std::env::args().nth(1).expect("No ROM provided"))
-        .expect("Failed to read ROM");
+    let rom_name = std::env::args().nth(1).expect("No ROM provided");
+    let rom = std::fs::read(rom_name.clone()).expect("Failed to read ROM");
 
     emu.load_rom(&rom);
 
@@ -40,8 +40,9 @@ fn main() {
         .unwrap();
 
     let video_subsystem = sdl_context.video().unwrap();
+    let title = format!("Chip-8 Emulator | {}", rom_name.split('/').last().unwrap());
     let window = video_subsystem
-        .window("Chip8 Emulator", 640, 320)
+        .window(title.as_str(), 640, 320)
         .position_centered()
         .opengl()
         .build()
