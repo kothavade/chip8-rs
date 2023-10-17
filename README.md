@@ -12,6 +12,9 @@ https://github.com/kothavade/chip8-rs/assets/60118973/82bdbd61-c501-43e1-958c-42
 
 ```sh
 nix develop # or direnv allow
+# get roms
+git submodule init
+git submodule update
 # run desktop build with sdl
 cd chip8-sdl
 cargo run ../roms/games/Space\ Invaders\ \[David\ Winter\].ch8
