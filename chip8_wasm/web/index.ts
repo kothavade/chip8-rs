@@ -1,5 +1,4 @@
-import { initSync } from "../pkg/chip8_wasm.js";
-import { Chip8Wasm } from "../pkg/chip8_wasm_bg.js";
+import { Chip8Wasm } from "../pkg/chip8_wasm.js";
 
 const WIDTH = 64;
 const HEIGHT = 32;
