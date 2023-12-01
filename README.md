@@ -1,6 +1,10 @@
-# Chip8-rs
+<h1 align="center">
+  👾 chip8-rs 👾
+</h1>
 
 An emulator for the Chip-8, written in Rust.
+
+The desktop build can be found in the `chip8_sdl` crate, the work in progress WASM build can be found in the `chip8_wasm` crate, and the core emulator logic is in the `chip8_core` crate.
 
 ## Demo
 
@@ -12,6 +16,9 @@ https://github.com/kothavade/chip8-rs/assets/60118973/82bdbd61-c501-43e1-958c-42
 
 ```sh
 nix develop # or direnv allow
+# get roms
+git submodule init
+git submodule update
 # run desktop build with sdl
 cd chip8-sdl
 cargo run ../roms/games/Space\ Invaders\ \[David\ Winter\].ch8
