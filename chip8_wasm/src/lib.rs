@@ -4,7 +4,7 @@ use js_sys::Uint8Array;
 use wasm_bindgen::prelude::*;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, KeyboardEvent};
 
-const KEYMAP: &[&str; 16] = COLEMAK_DH;
+const KEYMAP: &[&str; 16] = QWERTY;
 
 #[wasm_bindgen]
 pub struct Chip8Wasm {
@@ -21,19 +21,13 @@ impl Chip8Wasm {
             chip8: Chip8::new(),
             // most ergonomic rust library
             ctx: web_sys::window()
+                .and_then(|window| window.document())
+                .and_then(|document| document.get_element_by_id("canvas"))
+                .and_then(|element| element.dyn_into::<HtmlCanvasElement>().ok())
+                .and_then(|canvas| canvas.get_context("2d").ok())
                 .unwrap()
-                .document()
-                .unwrap()
-                .get_element_by_id("canvas")
-                .unwrap()
-                .dyn_into::<HtmlCanvasElement>()
-                .map_err(|_| ())
-                .unwrap()
-                .get_context("2d")
-                .unwrap()
-                .unwrap()
-                .dyn_into::<CanvasRenderingContext2d>()
-                .unwrap(),
+                .and_then(|context| context.dyn_into::<CanvasRenderingContext2d>().ok())
+                .unwrap_or_else(|| panic!("Failed to initialize CanvasRenderingContext2d")),
         }
     }
 
