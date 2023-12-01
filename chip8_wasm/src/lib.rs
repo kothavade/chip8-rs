@@ -64,9 +64,12 @@ impl Chip8Wasm {
             let x = (i % 64) as f64 * scale as f64;
             let y = (i / 64) as f64 * scale as f64;
             if pixel {
+                self.ctx.set_fill_style(&JsValue::from_str("#FFFFFF"));
                 self.ctx.fill_rect(x, y, scale as f64, scale as f64);
             } else {
-                self.ctx.clear_rect(x, y, scale as f64, scale as f64);
+                // self.ctx.clear_rect(x, y, scale as f64, scale as f64);
+                self.ctx.set_fill_style(&JsValue::from_str("#000000"));
+                self.ctx.fill_rect(x, y, scale as f64, scale as f64);
             }
         }
     }

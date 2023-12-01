@@ -4,9 +4,9 @@ init().then(() => {
   const WIDTH = 64;
   const HEIGHT = 32;
   const SCALE = 15;
-  const TICKS_PER_FRAME = 10;
-
-  let frame = 0;
+  let ticks_per_frame = 10;
+  let animationFrameId: number | null = null;
+  let lastFrameTime: number = 0;
 
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 
@@ -21,23 +21,27 @@ init().then(() => {
 
   const chip8 = new Chip8Wasm();
 
-  document.addEventListener("keydown", function (evt) {
+  document.addEventListener("keydown", (evt) => {
     chip8.keypress(evt, true);
   });
 
-  document.addEventListener("keyup", function (evt) {
+  document.addEventListener("keyup", (evt) => {
     chip8.keypress(evt, false);
   });
 
   input.addEventListener(
     "change",
     () => {
-      if (frame != 0) {
-        window.cancelAnimationFrame(frame);
+      if (animationFrameId !== null) {
+        window.cancelAnimationFrame(animationFrameId);
       }
       let file = input.files![0];
       if (!file) {
         alert("Failed to read file");
+        input.value = "";
+        // reset canvas
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, WIDTH * SCALE, HEIGHT * SCALE);
         return;
       }
       // Load in game as Uint8Array, send to .wasm, start main loop
@@ -46,24 +50,36 @@ init().then(() => {
         const rom = new Uint8Array(fr.result as ArrayBuffer);
         chip8.reset();
         chip8.load_rom(rom);
-        loop(chip8);
+        startLoop(chip8);
       };
       fr.readAsArrayBuffer(file);
     },
     false
   );
 
-  const loop = (chip8: Chip8Wasm) => {
-    for (let i = 0; i < TICKS_PER_FRAME; i++) {
+  const loop = (chip8: Chip8Wasm, timestamp: number) => {
+    const deltaTime = timestamp - lastFrameTime;
+    lastFrameTime = timestamp;
+
+    for (let i = 0; i < ticks_per_frame; i++) {
       chip8.cycle();
     }
     chip8.cycle_timer();
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, WIDTH * SCALE, HEIGHT * SCALE);
+
+    ctx.clearRect(0, 0, WIDTH * SCALE, HEIGHT * SCALE);
     ctx.fillStyle = "white";
     chip8.draw(SCALE);
-    frame = window.requestAnimationFrame(() => {
-      loop(chip8);
+
+    animationFrameId = window.requestAnimationFrame((timestamp) => {
+      loop(chip8, timestamp);
     });
+  };
+
+  const startLoop = (chip8: Chip8Wasm) => {
+    if (animationFrameId !== null) {
+      window.cancelAnimationFrame(animationFrameId);
+    }
+    lastFrameTime = performance.now();
+    loop(chip8, lastFrameTime);
   };
 });
