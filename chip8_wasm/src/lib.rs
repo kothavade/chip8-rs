@@ -32,6 +32,11 @@ impl Chip8Wasm {
     }
 
     #[wasm_bindgen]
+    pub fn health_check(&self) -> bool {
+        true
+    }
+
+    #[wasm_bindgen]
     pub fn reset(&mut self) {
         self.chip8.reset();
     }
